@@ -1,0 +1,40 @@
+applications:
+  - application: "RetirementCalculator"
+    description: "RetirementCalculator"
+    owner: "MDALBIN"
+    namingConventions:
+      - EBU
+  - application: "GenApp"
+    description: "GenApp"
+    owner: "DBEHM"
+    namingConventions:
+      - LGA
+      - LGD
+      - LGI
+      - LGT
+      - LGU
+      - LGS
+      - LGW
+      - OLD
+      - FLE
+  - application: "CBSA"
+    description: "CBSA"
+    owner: "MDALBIN"
+    namingConventions:
+      - ABN
+      - ACC
+      - BAN
+      - BNK
+      - CON
+      - CRD
+      - CRE
+      - CUS
+      - DBC
+      - DEL
+      - DPA
+      - GET
+      - INQ
+      - PRO
+      - UPD
+      - XFR
+      - ZUN
