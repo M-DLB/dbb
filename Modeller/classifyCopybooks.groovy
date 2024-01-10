@@ -352,7 +352,7 @@ def updateMappingsFiles(String path,String sourceApplication, String targetAppli
                 String line;
                 while((line = sourceApplicationMappingReader.readLine()) != null) {
                     if (line.contains(file)) {
-						println "replacing application ($sourceApplication) to ($targetApplication) in $line"
+						//println "replacing application ($sourceApplication) to ($targetApplication) in $line"
                         line = line.replaceAll(sourceApplication, targetApplication) 
                         targetApplicationMappingWriter.write(line + "\n")
                     } else {
