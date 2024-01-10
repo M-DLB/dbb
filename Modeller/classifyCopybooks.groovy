@@ -74,64 +74,95 @@ def assessImpactedFiles(appFiles) {
 		// Obtain impacts
 		println ("** Analyze impacted applications for file $file. ")
 		def impactedFiles = findImpactedFiles(props.copybookImpactSearch, file)
-		println "  Files depending on $file :"
+		
+		// Assess impacted files
+		if (impactedFiles.size() > 0) 
+			println "  Files depending on $file :"
+		
 		impactedFiles.each { impact ->
 			println "    ${impact.getFile()} \t in application context ${impact.getCollection().getName()}"
 			referencingCollections.add(impact.getCollection().getName())
 		}
 
 		// Asses Unique application usage
-		if (referencingCollections.size() == 1) {
+			if (referencingCollections.size() == 1) {
 			println "    ==> $file is owned by application ${referencingCollections[0]} "
+			
+			def movedCopybook
+			
+			File userAppConfigurationYaml = new File("${props.inputConfigurations}/${referencingCollections[0]}.yaml")
+			File updateAppConfigurationYaml = new File("${props.workspace}/${referencingCollections[0]}/${referencingCollections[0]}.yaml")
+			
+			// determine which YAML file to use
+			def applicationDescriptor
+
+			if (updateAppConfigurationYaml.exists()) { // update
+				applicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(updateAppConfigurationYaml)
+			}else { // use application yaml provided by user
+				applicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(userAppConfigurationYaml)
+			}
+			
+			// default repository path
+			repositoryPath = retrieveTargetRepositoryPath(applicationDescriptor, file)
+			
+
+			if (props.copySharedCopybooks) {
+				// move copybook		
+				movedCopybook = copyMemberToApplicationFolder(file, "${applicationDescriptor.application}/$repositoryPath")
+
+				// Update application mappings
+				updateMappingsFiles(props.inputConfigurations, props.application, referencingCollections[0], file);
+			}
 
 			// If update flag is set
-			if (!props.application.equals(referencingCollections[0]) && props.updatedApplicationsConfiguration) {
+			if (props.generateUpdatedApplicationConfiguration) {
+	
+				// append definition
+				Path pFile = Paths.get(file)
+				memberName = pFile.getFileName().toString().substring(0, pFile.getFileName().toString().indexOf("."))
+				applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, props.defaultCopybookFolderName, "none", props.defaultCopybookFileExtension, repositoryPath, memberName, "COPYBOOK", "PRIVATE")
 
-                // TODO: determine the segment in target directory
-                def movedCopybook = copyMemberToApplicationFolder(file, "${referencingCollections[0]}/${props.defaultCopybookFolderName}/")
-                shuffleLinesContaining(file, props.application, referencingCollections[0]);
-
-				File targetApplicationDescriptorFile = new File("${referencingCollections[0]}.yaml")
-                
-                // determine which YAML file to use
-                
-
-                if (targetApplicationDescriptorFile.exists()) {
-                    // Add the File definition to the target Application Descriptor that owns it              
-                    def targetApplicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(targetApplicationDescriptorFile)
-                    Path pFile = Paths.get(file)
-                    memberName = pFile.getFileName().toString()
-                    applicationDescriptorUtils.appendFileDefinition(targetApplicationDescriptor, props.defaultCopybookFolderName, "none", props.defaultCopybookFileExtension, memberName, "COPYBOOK", "PRIVATE")
-                    println "        Adding private copybook $movedCopybook to Application Descriptor " + targetApplicationDescriptorFile.getPath()
-                    applicationDescriptorUtils.writeApplicationDescriptor(targetApplicationDescriptorFile, targetApplicationDescriptor)
-                    
-                    // Remove the File definition from the  source Application Descriptor
-                    File sourceApplicationDescriptorFile = new File("${props.application}.yaml")                    
-                    def sourceApplicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(sourceApplicationDescriptorFile)
-                    applicationDescriptorUtils.removeFileDefinition(sourceApplicationDescriptor, "copy", memberName) 
-                    applicationDescriptorUtils.writeApplicationDescriptor(sourceApplicationDescriptorFile, sourceApplicationDescriptor)
-                    
-                } else {
-                    println "\t No Application Descriptor YAML file found for application ${referencingCollections[0]}" 
-                }
+				// update YAML file
+				
+				def msg = (movedCopybook) ? "        Adding private copybook $movedCopybook to application descriptor " : "        Updating private copybook $file in application descriptor " 
+				println "$msg" + updateAppConfigurationYaml.getPath()
+				applicationDescriptorUtils.writeApplicationDescriptor(updateAppConfigurationYaml, applicationDescriptor)
 				
 			}
+
 		} else if (referencingCollections.size() > 1) {
 			println "    ==> $file referenced by multiple applications. $referencingCollections "
 			
 			// document as a external dependency, if update flag is set
-			if (props.updatedApplicationsConfiguration) {
-                println "        Changing copybook $file to PUBLIC in ${props.application}.yaml"
+			if (props.generateUpdatedApplicationConfiguration && props.application != "Unclassified-Copybooks") {
 
-                File applicationDescriptorFile = new File("${props.application}.yaml")                    
-                def applicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(applicationDescriptorFile)
-                // Update the File definition              
-                Path pFile = Paths.get(file)
-                memberName = pFile.getFileName().toString()
-                applicationDescriptorUtils.removeFileDefinition(applicationDescriptor, props.defaultCopybookFolderName, memberName) 
-                applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, props.defaultCopybookFolderName, "none", props.defaultCopybookFileExtension, memberName, "COPYBOOK", "PUBLIC")
-                applicationDescriptorUtils.writeApplicationDescriptor(applicationDescriptorFile, applicationDescriptor)
+				File userAppConfigurationYaml = new File("${props.inputConfigurations}/${props.application}.yaml")
+				File updateAppConfigurationYaml = new File("${props.workspace}/${props.application}/${props.application}.yaml")
+				
+				// determine which YAML file to use
+				def applicationDescriptor
+
+				if (updateAppConfigurationYaml.exists()) { // update
+					applicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(updateAppConfigurationYaml)
+				}else { // use application yaml provided by user
+					applicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(userAppConfigurationYaml)
+				}
+				
+				// default repository path
+				repositoryPath = retrieveTargetRepositoryPath(applicationDescriptor, file)
+				
+				// append definition
+				Path pFile = Paths.get(file)
+				memberName = pFile.getFileName().toString().substring(0, pFile.getFileName().toString().indexOf("."))
+				
+				applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, props.defaultCopybookFolderName, "none", props.defaultCopybookFileExtension, repositoryPath, memberName, "COPYBOOK", "SHARED")
+
+				// update YAML file
+				println "        Adding/updating shared copybook $file to application descriptor " + updateAppConfigurationYaml.getPath()
+				applicationDescriptorUtils.writeApplicationDescriptor(updateAppConfigurationYaml, applicationDescriptor)
+				
 			}
+			
 		} else {
 			println "\t The Include File $file is not used at all."
 		}
@@ -150,8 +181,11 @@ def parseArgs(String[] args) {
 	// required sandbox options
 	cli.w(longOpt:'workspace', args:1, 'Absolute path to workspace (root) directory containing all required source directories')
 	cli.a(longOpt:'application', args:1, required:true, 'Application  name.')
-	cli.u(longOpt:'updatedApplicationsConfiguration', args:0, 'Flag to update Application Descriptors and Mapping files.')
-
+	cli.c(longOpt:'configurations', args:1, required:true, 'Path of application configuration Yaml files.')
+	cli.cf(longOpt:'copySharedCopybooks', args:0, 'Flag to indicate if shared copybooks should be moved.')
+	cli.g(longOpt:'generateUpdatedApplicationConfiguration', args:0, 'Flag to generate updated application configuration file.')
+	cli.r(longOpt:'repositoryLayoutMapping', args:1, 'Path to the Repository Layout file.')
+	
 
 	def opts = cli.parse(args)
 	if (!opts) {
@@ -160,7 +194,10 @@ def parseArgs(String[] args) {
 
 	if (opts.w) props.workspace = opts.w
 	if (opts.a) props.application = opts.a
-	if (opts.u) props.updatedApplicationsConfiguration = "true"
+	if (opts.c) props.inputConfigurations = opts.c
+	if (opts.cf) props.copySharedCopybooks = "true"
+	if (opts.g) props.generateUpdatedApplicationConfiguration = "true"
+	if (opts.r) props.repositoryLayoutMapping = opts.r
 
 }
 
@@ -246,9 +283,59 @@ def relativizePath(String path) {
 	return relPath
 }
 
-def shuffleLinesContaining(String file, String sourceApplication, String targetApplication) {
-    File sourceApplicationMappingFile = new File(sourceApplication + ".mapping")
-    File targetApplicationMappingFile = new File(targetApplication + ".mapping")
+/*
+ * Method to extract the repositoryPath
+ * Order:
+ *  Returns repositoryPath from existing application descriptor, if not present
+ *  returns repositoryPath based on the repositoryLayoutMapping file, if not available
+ *  return the fileCategory (last segment of the path)
+ */
+def retrieveTargetRepositoryPath(Object applicationDescriptor, String file) {
+	
+	def repositoryPath
+	
+	// get parent folder
+	String fileCategory = new File(file).parentFile.name
+	
+	if (applicationDescriptor) {
+		sourceGroup = applicationDescriptor.sources.find { it.name == fileCategory }
+		if (sourceGroup != null) {
+			repositoryPath = sourceGroup.repositoryPath
+			return repositoryPath
+		}
+	}
+
+	// if repositoryPath not defined, retrieve it from the default repositoryLayoutMapping.yaml
+	if (repositoryPath == null) {
+
+		if (props.repositoryLayoutMapping) {
+			File repositoryLayoutMappingFile = new File(props.repositoryLayoutMapping)
+			if (!repositoryLayoutMappingFile.exists()) {
+				println "!* Warning: ${props.repositoryLayoutMapping} not found. Process will exit."
+				System.exit(1)
+			} else {
+				def yamlSlurper = new groovy.yaml.YamlSlurper()
+				repositoryLayoutMapping = yamlSlurper.parse(repositoryLayoutMappingFile)
+				
+				repositoryConfig = repositoryLayoutMapping.repositoryLayout.find {repositoryLayout ->
+				repositoryLayout.mvsMapping.datasetLastLevelQualifiers.contains(fileCategory.toUpperCase())
+				}
+				
+				if (repositoryConfig) return repositoryConfig.repositoryPath.replaceAll('\\$application', applicationDescriptor.application)
+				
+			}
+		}
+		
+	}
+	
+	return fileCategory
+	
+}
+
+def updateMappingsFiles(String path,String sourceApplication, String targetApplication, String file) {
+	file = new File("${props.workspace}/$sourceApplication").toURI().relativize(new File("${props.workspace}/$file").toURI()).getPath()
+    File sourceApplicationMappingFile = new File("$path/" + sourceApplication + ".mapping")
+    File targetApplicationMappingFile = new File("$path/" + targetApplication + ".mapping")
     if (!sourceApplicationMappingFile.exists()) {
         println "!* Error: couldn't find the mapping file called '${sourceApplication}.mapping'" 
     } else {
@@ -265,7 +352,8 @@ def shuffleLinesContaining(String file, String sourceApplication, String targetA
                 String line;
                 while((line = sourceApplicationMappingReader.readLine()) != null) {
                     if (line.contains(file)) {
-                        line = line.replace(sourceApplication, targetApplication) 
+						println "replacing application ($sourceApplication) to ($targetApplication) in $line"
+                        line = line.replaceAll(sourceApplication, targetApplication) 
                         targetApplicationMappingWriter.write(line + "\n")
                     } else {
                         newSourceApplicationMappingWriter.write(line + "\n")

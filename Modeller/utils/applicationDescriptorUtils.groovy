@@ -24,6 +24,7 @@ class ApplicationDescriptor {
 
 class Source {
 	String name
+	String repositoryPath
 	String languageProcessor
 	String fileExtension
 	ArrayList<FileDef> files
@@ -91,7 +92,7 @@ def writeApplicationDescriptor(File yamlFile, ApplicationDescriptor applicationD
  * 
  */
 
-def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sourceGroupName, String languageProcessor, String fileExtension, String name, String type, String usage){
+def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sourceGroupName, String languageProcessor, String fileExtension, String repositoryPath, String name, String type, String usage){
 
 	def sourceGroupRecord
 
@@ -110,10 +111,20 @@ def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
 
 	if (existingSourceGroup) { // append file record definition to existing sourceGroup
         sourceGroupRecord = existingSourceGroup
-		if (!sourceGroupRecord.files) {
-		    sourceGroupRecord.files = new ArrayList<FileDef>()
+		
+		// check if the fileRecord already exists, and this is an update
+
+		existingFileRecord = sourceGroupRecord.files.find(){ file ->
+			file.name == fileRecord.name
 		}
-		sourceGroupRecord.files.add(fileRecord)
+
+		if (existingFileRecord) { // update existing file record
+			existingFileRecord.type = type
+			existingFileRecord.usage = usage
+		}
+		else { // add a new record
+			sourceGroupRecord.files.add(fileRecord)
+		}
 
 	}
 	else {
@@ -123,6 +134,7 @@ def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
 		sourceGroupRecord.name = sourceGroupName
 		sourceGroupRecord.languageProcessor = languageProcessor
 		sourceGroupRecord.fileExtension = fileExtension
+		sourceGroupRecord.repositoryPath = repositoryPath
 
 		sourceGroupRecord.files = new ArrayList<FileDef>()
 		// append file record
