@@ -19,13 +19,13 @@ parseArgs(args)
 
 initScriptParameters()
 
-println ("** Getting the list of files...")
+println ("** Getting the list of files.")
 Set<String> appFiles = getFileList()
 
-println ("** Scanning the files...")
+println ("** Scanning the files.")
 List<LogicalFile> logicalFiles = scanFiles(appFiles)
 
-println ("** Store results in DBB Collection.")
+println ("** Store results in DBB Collection (${props.application}).")
 // manage collection
 if (!metadataStore.collectionExists(props.application)) {
 	// create collection
@@ -110,8 +110,8 @@ def initScriptParameters() {
  * relativizePath - converts an absolute path to a relative path from the workspace directory
  */
 def relativizePath(String path) {
-//	if (!path.startsWith('/'))
-//		return path
+	if (!path.startsWith('/'))
+		return path
 	String relPath = new File(props.workspace).toURI().relativize(new File(path.trim()).toURI()).getPath()
 	// Directories have '/' added to the end.  Lets remove it.
 	if (relPath.endsWith('/'))
