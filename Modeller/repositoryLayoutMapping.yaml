@@ -1,1 +1,39 @@
-™…—–¢‰£–™¨Ó¨–¤£z@@`@™…—–¢‰£–™¨×£ˆz@[——“‰ƒ£‰–•a¢™ƒaƒ–‚–“@@@@†‰“…Å§£…•¢‰–•z@ƒ‚“@@@@£–Ó–¦…™Ã¢…z@£™¤…@@@@…•ƒ–„‰•‡z@ÉÂÔ`ñğô÷@@@@”¥¢Ô——‰•‡z@@@@@@„£¢…£Ó¢£Ó…¥…“Ø¤“‰†‰…™¢z@@@@@@@@@@`@ÃÖÂÖÓ@@@@@@@@@@`@ÃÂÓ@@@@@@£¨—…¢z@@@@@@@@@@`@ÃÂÓÃÉÃâÄÂò@@@@@@@@@@`@ÃÂÓÃÉÃâ@@`@™…—–¢‰£–™¨×£ˆz@[——“‰ƒ£‰–•a¢™ƒaƒ–‚–“@@@@†‰“…Å§£…•¢‰–•z@ƒ‚“@@@@£–Ó–¦…™Ã¢…z@£™¤…@@@@…•ƒ–„‰•‡z@ÉÂÔ`ñğô÷@@@@”¥¢Ô——‰•‡z@@@@@@„£¢…£Ó¢£Ó…¥…“Ø¤“‰†‰…™¢z@@@@@@@@@@`@âÙÃ@@@@@@£¨—…¢z@@@@@@@@@@`@ÃÂÓÃÉÃâÄÂò@@@@@@@@@@`@ÃÂÓÃÉÃâ@@`@™…—–¢‰£–™¨×£ˆz@[——“‰ƒ£‰–•a¢™ƒa—“‰@@@@†‰“…Å§£…•¢‰–•z@ƒ‚“@@@@£–Ó–¦…™Ã¢…z@£™¤…@@@@…•ƒ–„‰•‡z@ÉÂÔ`ñğô÷@@@@”¥¢Ô——‰•‡z@@@@@@„£¢…£Ó¢£Ó…¥…“Ø¤“‰†‰…™¢z@@@@@@@@`@âÙÃ@@@@@@£¨—…¢z@@@@@@@@`@×ÓÉÃÉÃâÄÂò@@@@@@@@`@×ÓÉÃÉÃâ@@`@™…—–¢‰£–™¨×£ˆz@[——“‰ƒ£‰–•a¢™ƒaƒ–—¨@@@@†‰“…Å§£…•¢‰–•z@ƒ—¨@@@@£–Ó–¦…™Ã¢…z@£™¤…@@@@…•ƒ–„‰•‡z@ÉÂÔ`ñğô÷@@@@”¥¢Ô——‰•‡z@@@@@@„£¢…£Ó¢£Ó…¥…“Ø¤“‰†‰…™¢z@@@@@@@@@@`@ÃÖ×è
+repositoryLayout:
+  - repositoryPath: $application/src/cobol
+    fileExtension: cbl
+    toLowerCase: true
+    encoding: IBM-1047
+    mvsMapping:
+      datasetLastLevelQualifiers:
+          - COBOL
+          - CBL
+      types:
+          - CBLCICSDB2
+          - CBLCICS
+  - repositoryPath: $application/src/cobol
+    fileExtension: cbl
+    toLowerCase: true
+    encoding: IBM-1047
+    mvsMapping:
+      datasetLastLevelQualifiers:
+          - SRC
+      types:
+          - CBLCICSDB2
+          - CBLCICS
+  - repositoryPath: $application/src/pli
+    fileExtension: cbl
+    toLowerCase: true
+    encoding: IBM-1047
+    mvsMapping:
+      datasetLastLevelQualifiers:
+        - SRC
+      types:
+        - PLICICSDB2
+        - PLICICS
+  - repositoryPath: $application/src/copy
+    fileExtension: cpy
+    toLowerCase: true
+    encoding: IBM-1047
+    mvsMapping:
+      datasetLastLevelQualifiers:
+          - COPY
