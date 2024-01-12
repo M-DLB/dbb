@@ -1,5 +1,6 @@
-repositoryLayout:
+repositoryPaths:
   - repositoryPath: $application/src/cobol
+    artifactsType: "Program"
     fileExtension: cbl
     toLowerCase: true
     encoding: IBM-1047
@@ -11,6 +12,7 @@ repositoryLayout:
           - CBLCICSDB2
           - CBLCICS
   - repositoryPath: $application/src/cobol
+    artifactsType: "Program"
     fileExtension: cbl
     toLowerCase: true
     encoding: IBM-1047
@@ -21,6 +23,7 @@ repositoryLayout:
           - CBLCICSDB2
           - CBLCICS
   - repositoryPath: $application/src/pli
+    artifactsType: "Program"
     fileExtension: cbl
     toLowerCase: true
     encoding: IBM-1047
@@ -31,6 +34,7 @@ repositoryLayout:
         - PLICICSDB2
         - PLICICS
   - repositoryPath: $application/src/copy
+    artifactsType: "Include File"
     fileExtension: cpy
     toLowerCase: true
     encoding: IBM-1047

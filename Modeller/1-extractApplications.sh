@@ -8,10 +8,17 @@
 # Contract with IBM Corp. 
 #*******************************************************************************
 
-export DBB_MODELLER_HOME=/u/dbehm/git/MDLB/dbb/Modeller
-export DBB_MODELLER_WORK=/u/dbehm/git/MDLB/dbb/Modeller/work_app_configs
-
-mkdir -p $DBB_MODELLER_WORK
-cd $DBB_MODELLER_WORK 
-
-groovyz $DBB_MODELLER_HOME/extractApplications.groovy -d DBEHM.MIG.COBOL,DBEHM.MIG.COPY -mp aaa..... --applicationMapping $DBB_MODELLER_HOME/applicationMappings.yml --repositoryLayoutMapping $DBB_MODELLER_HOME/repositoryLayoutMapping.yaml --types $DBB_MODELLER_HOME/types.txt
+if [  "$DBB_HOME" = "" ]
+then
+   echo "Environment variable DBB_HOME is not set. Exiting..."
+else
+    export DBB_MODELLER_HOME=/u/mdalbin/Modeller/dbb/Modeller
+	export DBB_MODELLER_APPCONFIGS=$DBB_MODELLER_HOME/work-configs
+	if [ -d $DBB_MODELLER_APPCONFIGS ] 
+	then
+		rm -rf $DBB_MODELLER_APPCONFIGS
+	fi
+	mkdir -p $DBB_MODELLER_APPCONFIGS
+    CMD="$DBB_HOME/bin/groovyz ./extractApplications.groovy"
+    $CMD "$@"
+fi

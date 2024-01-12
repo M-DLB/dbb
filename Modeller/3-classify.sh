@@ -3,40 +3,38 @@
 # and scans application contexts
 #################################
 
-export DBB_MODELLER_HOME=/u/dbehm/git/MDLB/dbb/Modeller
-export DBB_MODELLER_WORK=/u/dbehm/git/MDLB/dbb/Modeller/work_app_configs
-export DBB_MODELLER_REPODIR=/u/dbehm/git/MDLB/dbb/Modeller/work_repos
-
 if [  "$DBB_HOME" = "" ]
 then
     echo "Environment variable DBB_HOME is not set. Exiting..."
 else
-    cd $DBB_MODELLER_WORK
+	export DBB_MODELLER_HOME=/u/mdalbin/Modeller/dbb/Modeller
+	export DBB_MODELLER_APPCONFIGS=$DBB_MODELLER_HOME/work-configs
+	export DBB_MODELLER_APPLICATIONS=$DBB_MODELLER_HOME/work-applications
+	
+    cd $DBB_MODELLER_APPCONFIGS
     for mappingFile in `ls *.mapping`
     do
         application=`echo $mappingFile | awk -F. '{ print $1 }'`
         echo "*******************************************************************"
-        echo "Scan application directory $DBB_MODELLER_REPODIR/$application"
+        echo "Scan application directory $DBB_MODELLER_APPLICATIONS/$application"
         echo "*******************************************************************"
         $DBB_HOME/bin/groovyz $DBB_MODELLER_HOME/scanApplication.groovy \
-           -w $DBB_MODELLER_REPODIR \
+           -w $DBB_MODELLER_APPLICATIONS \
            -a $application
-     done
+	done
 
-
+    cd $DBB_MODELLER_APPCONFIGS
     for mappingFile in `ls *.mapping`
     do
         application=`echo $mappingFile | awk -F. '{ print $1 }'`
         echo "*******************************************************************"
-        echo "Assess Include files usages for $application"
+        echo "Assess Include files usage for $application"
         echo "*******************************************************************"
-        $DBB_HOME/bin/groovyz $DBB_MODELLER_HOME/classifyCopybooks.groovy \
-           --workspace $DBB_MODELLER_REPODIR \
+        $DBB_HOME/bin/groovyz $DBB_MODELLER_HOME/classifyIncludeFiles.groovy \
+           --workspace $DBB_MODELLER_APPLICATIONS \
            --application $application \
-           --configurations $DBB_MODELLER_WORK \
-           --copySharedCopybooks \
-           --generateUpdatedApplicationConfiguration \
-           --repositoryLayoutMapping $DBB_MODELLER_HOME/repositoryLayoutMapping.yaml
+           --configurations $DBB_MODELLER_APPCONFIGS \
+           --updatedApplicationConfiguration
     done
     
 fi

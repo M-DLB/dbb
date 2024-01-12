@@ -27,6 +27,7 @@ class Source {
 	String repositoryPath
 	String languageProcessor
 	String fileExtension
+	String artifactsType
 	ArrayList<FileDef> files
 }
 
@@ -92,7 +93,7 @@ def writeApplicationDescriptor(File yamlFile, ApplicationDescriptor applicationD
  * 
  */
 
-def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sourceGroupName, String languageProcessor, String fileExtension, String repositoryPath, String name, String type, String usage){
+def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sourceGroupName, String languageProcessor, String artifactsType, String fileExtension, String repositoryPath, String name, String type, String usage){
 
 	def sourceGroupRecord
 
@@ -134,6 +135,7 @@ def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
 		sourceGroupRecord.name = sourceGroupName
 		sourceGroupRecord.languageProcessor = languageProcessor
 		sourceGroupRecord.fileExtension = fileExtension
+		sourceGroupRecord.artifactsType = artifactsType
 		sourceGroupRecord.repositoryPath = repositoryPath
 
 		sourceGroupRecord.files = new ArrayList<FileDef>()
@@ -151,7 +153,7 @@ def appendFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
 def removeFileDefinition(ApplicationDescriptor applicationDescriptor, String sourceGroupName, String name){
 
     if (applicationDescriptor.sources) {
-        def existingSourceGroup = applicationDescriptor.sources.find(){ source ->
+        def existingSourceGroup = applicationDescriptor.sources.find() { source ->
             source.name == sourceGroupName
         }
         if (existingSourceGroup) { // Found an existing Source Group that matches
@@ -159,7 +161,7 @@ def removeFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
                 file.name.equals(name)
             }
             if (existingFileDef) {
-                println "Found matching file ${existingFileDef.name}"
+//                println "Found matching file ${existingFileDef.name}"
                 existingSourceGroup.files.remove(existingFileDef)
             }
         }
