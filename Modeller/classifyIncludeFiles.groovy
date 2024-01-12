@@ -159,11 +159,20 @@ def assessImpactedFiles(HashMap<String, ArrayList<String>> includeFiles) {
 			if (props.updatedApplicationConfiguration) {
 				// just modify the scope as PUBLIC or SHARED
 				if (props.application.equals("UNASSIGNED")) {
-					applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, sourceGroupName, "none", artifactsType, fileExtension, repositoryPath, file, "Include File", "SHARED")
 					println "\t==> Updating usage of Include File '$file' to SHARED in Application Descriptor ${updatedApplicationDescriptorFile.getPath()}."
+					applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, sourceGroupName, "none", artifactsType, fileExtension, repositoryPath, file, "Include File", "SHARED")
 				} else {
-					applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, sourceGroupName, "none", artifactsType, fileExtension, repositoryPath, file, "Include File", "PUBLIC")
 					println "\t==> Updating usage of Include File '$file' to PUBLIC in Application Descriptor ${updatedApplicationDescriptorFile.getPath()}."
+					applicationDescriptorUtils.appendFileDefinition(applicationDescriptor, sourceGroupName, "none", artifactsType, fileExtension, repositoryPath, file, "Include File", "PUBLIC")
+					referencingCollections.each { consumerCollection ->
+						// update consumer applications
+						consumerApplicationDescriptorFile = new File("${props.workspace}/${consumerCollection}/${consumerCollection}.yaml")
+						consumerApplicationDescriptor = applicationDescriptorUtils.readApplicationDescriptor(consumerApplicationDescriptorFile)
+						applicationDescriptorUtils.addApplicationDependency(consumerApplicationDescriptor, applicationDescriptor.application)
+						applicationDescriptorUtils.writeApplicationDescriptor(consumerApplicationDescriptorFile, consumerApplicationDescriptor)
+						// update providing application providing the service
+						applicationDescriptorUtils.addApplicationConsumer(applicationDescriptor, consumerCollection)
+					}
 				}
 				applicationDescriptorUtils.writeApplicationDescriptor(updatedApplicationDescriptorFile, applicationDescriptor)
 			}

@@ -20,6 +20,8 @@ class ApplicationDescriptor {
 	String description
 	String owner
 	ArrayList<Source> sources
+	HashSet<String> dependencies
+	HashSet<String> consumers
 }
 
 class Source {
@@ -36,6 +38,7 @@ class FileDef {
 	String type
 	String usage
 }
+
 
 /////// Test
 //ApplicationDescriptor applicationDescriptor = readApplicationDescriptor(new File("/u/dbehm/componentization/applicationConfigurations/retirementCalculator.yaml"))
@@ -77,6 +80,8 @@ def writeApplicationDescriptor(File yamlFile, ApplicationDescriptor applicationD
 		description applicationDescriptor.description
 		owner applicationDescriptor.owner
 		sources (applicationDescriptor.sources)
+		dependencies applicationDescriptor.dependencies
+		consumers applicationDescriptor.consumers
 	}
 
 	// write file
@@ -168,7 +173,35 @@ def removeFileDefinition(ApplicationDescriptor applicationDescriptor, String sou
     }
 }
 
+/**
+ * Method to add an application dependency 
+ */
 
+def addApplicationDependency(ApplicationDescriptor applicationDescriptor, applicationDependency) {
+	
+	if (!applicationDescriptor.dependencies) {
+		applicationDescriptor.dependencies = new HashSet<String>()
+	 }
+	 
+	applicationDescriptor.dependencies.add(applicationDependency)
+}
+
+/**
+ * Method to add a consumer to list of consumers
+ */
+
+def addApplicationConsumer(ApplicationDescriptor applicationDescriptor, applicationDependency) {
+	
+	// init
+	if (!applicationDescriptor.consumers) {
+		applicationDescriptor.consumers = new HashSet<String>()
+	 }
+	 
+	// dont add the "owning" application
+	if (applicationDescriptor.application != applicationDependency) {
+		applicationDescriptor.consumers.add(applicationDependency)
+	}
+}
 
 def createEmptyApplicationDescriptor(){
     ApplicationDescriptor applicationDescriptor = new ApplicationDescriptor()

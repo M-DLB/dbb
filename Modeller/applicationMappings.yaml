@@ -4,6 +4,7 @@ applications:
     owner: "MDALBIN"
     namingConventions:
       - EBU.....
+      - LINPUT..
   - application: "GenApp"
     description: "GenApp"
     owner: "DBEHM"
