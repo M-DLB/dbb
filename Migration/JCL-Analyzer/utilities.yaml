@@ -1,0 +1,7 @@
+utilities:
+  - program: "CMNWRITE"
+    description: "ChangeMan Write utility"
+    shouldBeMigrated: true    
+  - program: "SERCOPY"
+    description: "ChangeMan Copy utility"
+    shouldBeMigrated: true
