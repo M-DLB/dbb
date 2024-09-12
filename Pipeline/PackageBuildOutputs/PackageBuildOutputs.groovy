@@ -515,7 +515,7 @@ if (rc == 0) {
 		
 							// Append record to Wazi Deploy Application Manifest
 							if (wdManifestGeneratorUtilities && props.generateWaziDeployAppManifest && props.generateWaziDeployAppManifest.toBoolean()) {
-								wdManifestGeneratorUtilities.appendArtifactToManifest(deployableArtifact, "$relativeFilePath/$fileName", record, propertiesRecord)
+								wdManifestGeneratorUtilities.appendArtifactToManifest(deployableArtifact, "$relativeFilePath/$fileName", record, dependencySetRecord, propertiesRecord)
 							}
 		
 						} else {
@@ -547,7 +547,9 @@ if (rc == 0) {
 		if (wdManifestGeneratorUtilities && props.generateWaziDeployAppManifest && props.generateWaziDeployAppManifest.toBoolean() && rc == 0) {
 			// print application manifest
 			// wazideploy_manifest.yml is the default name of the manifest file
-			wdManifestGeneratorUtilities.writeWaziDeployManifestFile(new File("$tempLoadDir/wazideploy_manifest.yml"), props.fileEncoding, props.verbose)
+			//wdManifestGeneratorUtilities.writeWaziDeployManifestFile(new File("$tempLoadDir/wazideploy_manifest.yml"), props.fileEncoding, props.verbose)
+			File externalDependenciesEvidenceFile = new File("${props.externalDependenciesEvidences}")
+			wdManifestGeneratorUtilities.writeWaziDeployManifestFile(new File("$tempLoadDir/wazideploy_manifest.yml"), props.fileEncoding, props.verbose, externalDependenciesEvidenceFile)
 		}
 	
 		if (rc == 0) {
@@ -780,6 +782,8 @@ def parseInput(String[] cliArgs){
 		
 	// Wazi Deploy Application Manifest generation
 	cli.wd(longOpt:'generateWaziDeployAppManifest', 'Flag indicating to generate and add the Wazi Deploy Application Manifest file.')
+	cli.ed(longOpt:'externalDependenciesEvidences', args:1, argName:'externalDependenciesEvidences', 'File documenting the external dependencies that were provided to the build phase.')
+	
 
 	// Artifact repository options ::
 	cli.p(longOpt:'publish', 'Flag to indicate package upload to the provided Artifact Repository server. (Optional)')
@@ -841,6 +845,9 @@ def parseInput(String[] cliArgs){
 	if (opts.af) props.applicationFolderPath = opts.af
 	
 	if (opts.bp) props.baselinePackageFilePath = opts.bp
+
+	if (opts.ed) props.externalDependenciesEvidences = opts.ed
+
 
 	// cli overrides defaults set in 'packageBuildOutputs.properties'
 	props.generateWaziDeployAppManifest = (opts.wd) ? 'true' : props.generateWaziDeployAppManifest

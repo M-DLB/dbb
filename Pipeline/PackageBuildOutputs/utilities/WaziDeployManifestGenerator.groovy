@@ -2,6 +2,7 @@ import groovy.transform.*
 import groovy.yaml.YamlBuilder
 import groovy.yaml.YamlSlurper
 import com.ibm.dbb.build.report.records.*
+import com.ibm.dbb.dependency.*
 
 /*
  * This is a utility method to generate the Wazi Deploy Application Manifest file  
@@ -64,7 +65,7 @@ def readWaziDeployManifestFile(File yamlFile, Properties props) {
 /**
  * Append Artifact Record to Wazi Deploy Application Manifest 
  */
-def appendArtifactToManifest(DeployableArtifact deployableArtifact, String path, Record record, PropertiesRecord propertiesRecord) {
+def appendArtifactToManifest(DeployableArtifact deployableArtifact, String path, Record record, DependencySetRecord dependencySetRecord, PropertiesRecord propertiesRecord) {
 
 	Artifact artifact = new Artifact()
 	artifact.name = deployableArtifact.file
@@ -87,6 +88,21 @@ def appendArtifactToManifest(DeployableArtifact deployableArtifact, String path,
 			}
 		}
 	}
+	
+	if (dependencySetRecord) {
+
+		// init the dependency set object
+		DependencySet dependencySet = new DependencySet()
+
+		dependencySetRecord.getAllDependencies().each { PhysicalDependency pDep ->
+			// add the dependencies to the arraylist
+			dependencySet.value.add(pDep)
+		}
+
+		artifact.properties.add(dependencySet)
+
+	}
+	
 	// add type
 	artifact.type = deployableArtifact.deployType
 
@@ -192,9 +208,15 @@ def setScmInfo(HashMap<String, String> scmInfoMap) {
 /**
  * Write an Wazi Deploy Manifest  a YAML file
  */
-def writeWaziDeployManifestFile(File yamlFile, String fileEncoding, String verbose) {
+def writeWaziDeployManifestFile(File yamlFile, String fileEncoding, String verbose, File externalDependenciesEvidenceFile) {
 	println("** Generate Wazi Deploy Application Manifest file to $yamlFile")
 	def yamlBuilder = new YamlBuilder()
+	
+	def yamlSlurper = new YamlSlurper()
+	if (externalDependenciesEvidenceFile.exists()) {
+		ExternalDependencies externalDependenciesEvidences = yamlSlurper.parse(externalDependenciesEvidenceFile)
+		wdManifest.metadata.annotations.external_dependencies = externalDependenciesEvidences.external_dependencies
+	}
 
 	if (wdManifest.artifacts && wdManifest.deleted_artifacts) { 
 		yamlBuilder {
@@ -274,6 +296,8 @@ class Annotations {
 	String creationTimestamp
 	ScmInfo scmInfo
 	PackageInfo packageInfo
+	ArrayList<ExternalDependency> external_dependencies
+	ArrayList buildInfo
 }
 
 class ScmInfo {
@@ -300,6 +324,36 @@ class Artifact {
 }
 
 class ElementProperty {
+	String key
+	String value
+}
+
+class DependencySet{
+	String key = "dependency_set"
+	ArrayList<PhysicalDependency> value = new ArrayList<>()
+}
+
+/**
+ * * 
+ * External Dependencies
+ */
+
+
+/**
+ * Utilities to read, update or export existing ApplicationDescriptor from/to YAML
+ */
+
+class ExternalDependencies {
+	ArrayList<ExternalDependency> external_dependencies = new ArrayList<>()
+}
+
+class ExternalDependency {
+	String name
+	String type
+	HashSet<Property> properties = new HashSet<>()
+}
+
+class Property {
 	String key
 	String value
 }
