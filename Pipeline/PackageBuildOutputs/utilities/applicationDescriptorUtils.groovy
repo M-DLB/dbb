@@ -283,7 +283,7 @@ def getFileUsage(ApplicationDescriptor applicationDescriptor, String sourceGroup
 						println("*! [WARNING] Multiple files found matching '${name}'. Skipping search.")
 						return null
 					} else {
-						println("*! [WARNING] No file found matching '${name}'. Skipping search.")
+						println("*! [WARNING] No file reference found in application descripor matching '${name}'. Skipping search.")
 						return null
           }
 				} else {
